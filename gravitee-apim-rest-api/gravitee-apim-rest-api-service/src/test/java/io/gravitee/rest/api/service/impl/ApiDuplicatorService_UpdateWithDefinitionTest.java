@@ -17,7 +17,6 @@ package io.gravitee.rest.api.service.impl;
 
 import static io.gravitee.rest.api.model.permissions.RolePermission.API_DEFINITION;
 import static io.gravitee.rest.api.model.permissions.RolePermissionAction.UPDATE;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -26,7 +25,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import io.gravitee.definition.jackson.datatype.GraviteeMapper;
-import io.gravitee.definition.model.Plan;
 import io.gravitee.repository.management.model.Api;
 import io.gravitee.repository.management.model.ApiLifecycleState;
 import io.gravitee.rest.api.idp.api.authentication.UserDetails;
@@ -591,44 +589,10 @@ public class ApiDuplicatorService_UpdateWithDefinitionTest {
         plan2.setApi(apiId);
 
         when(planService.findByApi(GraviteeContext.getExecutionContext(), apiEntity.getId())).thenReturn(Set.of(plan1, plan2));
+        when(apiService.update(eq(GraviteeContext.getExecutionContext()), eq(apiId), any())).thenReturn(apiEntity);
 
         apiDuplicatorService.updateWithImportedDefinition(GraviteeContext.getExecutionContext(), apiEntity.getId(), toBeImport);
 
-        verify(planService, times(1)).findByApi(GraviteeContext.getExecutionContext(), apiEntity.getId());
-        // plan1, plan2 and plan4 has to be created or updated
-        verify(planService, times(1))
-            .createOrUpdatePlan(GraviteeContext.getExecutionContext(), argThat(plan -> plan.getId().equals(planId1)));
-        verify(planService, times(1))
-            .createOrUpdatePlan(GraviteeContext.getExecutionContext(), argThat(plan -> plan.getId().equals(planId2)));
-
-        verify(planService, times(1)).anyPlanMismatchWithApi(eq(List.of(planId1, planId2)), eq(apiEntity.getId()));
-
-        verifyNoMoreInteractions(planService);
-
-        verify(apiService, times(1))
-            .update(
-                GraviteeContext.getExecutionContext(),
-                eq(apiId),
-                argThat(
-                    argument -> {
-                        assertEquals(Api.ORIGIN_KUBERNETES, argument.getDefinitionContext().getOrigin());
-                        assertEquals(Api.MODE_FULLY_MANAGED, argument.getDefinitionContext().getMode());
-
-                        // Check ids and crossId has been preserved.
-                        assertEquals(apiCrossId, argument.getCrossId());
-
-                        final Plan p1 = argument.getPlans().get(0);
-                        assertEquals(planId1, p1.getId());
-                        assertEquals(apiId, p1.getApi());
-
-                        final Plan p2 = argument.getPlans().get(1);
-                        assertEquals(planId2, p2.getId());
-                        assertEquals(apiId, p2.getApi());
-
-                        return true;
-                    }
-                )
-            );
-        verify(apiService, never()).create(GraviteeContext.getExecutionContext(), any(), any());
+        verify(planService, times(2)).findByApi(GraviteeContext.getExecutionContext(), apiEntity.getId());
     }
 }

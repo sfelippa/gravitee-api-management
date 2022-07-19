@@ -2035,10 +2035,10 @@ public class ApiServiceImpl extends AbstractService implements ApiService {
                     // Delete plans
                     Set<PlanEntity> plans = planService.findByApi(executionContext, apiId);
                     Set<String> plansNotClosed = plans
-                            .stream()
-                            .filter(plan -> plan.getStatus() == PlanStatus.PUBLISHED)
-                            .map(PlanEntity::getName)
-                            .collect(toSet());
+                        .stream()
+                        .filter(plan -> plan.getStatus() == PlanStatus.PUBLISHED)
+                        .map(PlanEntity::getName)
+                        .collect(toSet());
 
                     if (!plansNotClosed.isEmpty()) {
                         throw new ApiNotDeletableException(plansNotClosed);
@@ -2066,11 +2066,11 @@ public class ApiServiceImpl extends AbstractService implements ApiService {
                         properties.put(Event.EventProperties.USER.getValue(), getAuthenticatedUser().getUsername());
                     }
                     eventService.createApiEvent(
-                            executionContext,
-                            singleton(executionContext.getEnvironmentId()),
-                            EventType.UNPUBLISH_API,
-                            null,
-                            properties
+                        executionContext,
+                        singleton(executionContext.getEnvironmentId()),
+                        EventType.UNPUBLISH_API,
+                        null,
+                        properties
                     );
 
                     // Delete pages
@@ -2268,7 +2268,7 @@ public class ApiServiceImpl extends AbstractService implements ApiService {
         Api api = apiRepository.findById(apiId).orElseThrow(() -> new ApiNotFoundException(apiId));
 
         if (DefinitionContext.isKubernetes(api.getOrigin())) {
-            throw new ApiNotManagedException("The api is managed externally (" + apiValue.getOrigin() + "). Unable to deploy it.");
+            throw new ApiNotManagedException("The api is managed externally (" + api.getOrigin() + "). Unable to deploy it.");
         }
 
         // add deployment date

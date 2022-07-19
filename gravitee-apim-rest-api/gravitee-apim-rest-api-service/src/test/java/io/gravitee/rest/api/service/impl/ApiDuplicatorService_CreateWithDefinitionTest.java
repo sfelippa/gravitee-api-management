@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import io.gravitee.definition.model.Plan;
 import io.gravitee.repository.exceptions.TechnicalException;
 import io.gravitee.repository.management.model.Api;
 import io.gravitee.rest.api.idp.api.authentication.UserDetails;
@@ -39,11 +38,7 @@ import io.gravitee.rest.api.service.spring.ImportConfiguration;
 import io.gravitee.rest.api.service.spring.ServiceConfiguration;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import org.junit.After;
+import java.util.*;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -565,11 +560,12 @@ public class ApiDuplicatorService_CreateWithDefinitionTest {
                         // Check ids and crossId has been preserved.
                         assertEquals(apiCrossId, argument.getCrossId());
 
-                        final Plan plan1 = argument.getPlans().get(0);
+                        List<PlanEntity> plans = new ArrayList<>(argument.getPlans());
+                        final PlanEntity plan1 = plans.get(0);
                         assertEquals(planId1, plan1.getId());
                         assertEquals(apiId, plan1.getApi());
 
-                        final Plan plan2 = argument.getPlans().get(1);
+                        final PlanEntity plan2 = plans.get(1);
                         assertEquals(planId2, plan2.getId());
                         assertEquals(apiId, plan2.getApi());
 
